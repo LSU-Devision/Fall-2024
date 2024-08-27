@@ -60,6 +60,8 @@ def main(args):
     # Assuming class dictionaries are stored in 'class_dicts/' with filenames matching the images
     cls_filenames = sorted(glob("labels/*.*"))
 
+    # Function to extract labels from label files
+    # Amount of labels can be changed and UF and F can be changed to new labels if any
     def process_file(file_path):
         label_dict = {}
         
@@ -86,9 +88,14 @@ def main(args):
         sorted_label_dict = OrderedDict(sorted(label_dict.items()))
         return sorted_label_dict
     
+    # Calling the above function
     C = [process_file(f) for f in cls_filenames]
 
-    # configuration object with model parameters to be used in initilization/training
+    # Configuration for StarDist
+    # n_rays is the number of rays to use
+    # 
+    # n_channel_in is the input dimensions of the images, RGB = 3 channels, grayscale = 1 channel
+    # n_classes is the number of classes
     conf = Config2D(
         n_rays          = 32,
         grid            = (4, 4),
@@ -114,7 +121,7 @@ def main(args):
         img = img*np.random.uniform(0.6,2) + np.random.uniform(-0.2,0.2)
         return img
 
-    # this is the augmenter that will go into the training of the model
+    # this is the augmenter that will go into the training of the model using the two above functions
     def augmenter(x, y):
         x, y = random_fliprot(x, y)
         x = random_intensity_change(x)
@@ -122,9 +129,10 @@ def main(args):
         x = x + sig*np.random.normal(0,1,x.shape)
         return x, y
     
+    # testing size for training. will always be 20% of total data
     testing_size = int(.2 * len(X))
 
-    # determine sizes for training and validation
+    # training size for training. will always be 80% of the remaining data after testing size has been subtracted
     training_size = int(.8 * (len(X) - testing_size))
 
     # Generate a list of random indices
@@ -157,6 +165,7 @@ def main(args):
     Y_val = [Y[i] for i in val_indices]
     C_val = [C[i] for i in val_indices]
 
+    # print statements to ensure everything is correct
     print(f"training set size: {len(X_train)}")
     print(f"validation set size: {len(X_val)}")
     print(f"testing set size: {len(X_test)}")
@@ -184,8 +193,6 @@ def main(args):
         fig.tight_layout()  # adjust layout so labels do not overlap
         fig.savefig(filename, dpi=600)
 
-
-
     # where the model will be saved
     base_dir = "models"
 
@@ -193,10 +200,8 @@ def main(args):
     dataset_dir = os.path.join(base_dir, f'datasize_{len(X)}')
     os.makedirs(dataset_dir, exist_ok=True)
 
-
-
     # this section saves the training, validation, and testing data in separate images to
-    # see the data the program selected using the function from above
+    # see the data the program selected
     # saving the training images
     training_filename = os.path.join(dataset_dir, 'training_images.png')  # define the path and name for your image
     save_images_to_file(X_train, training_filename, "Training Images")
@@ -209,7 +214,7 @@ def main(args):
     testing_filename = os.path.join(dataset_dir, 'testing_images.png')  # define the path and name for your image
     save_images_to_file(X_test, testing_filename, "Testing Images")
 
-    # function to evaluate and save csv files
+    # function to evaluate and save csv files for validation and testing
     def evaluate_and_save(model, X_data, Y_data, data_type='validation'):
 
         # prediction

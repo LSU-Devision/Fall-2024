@@ -4,7 +4,7 @@ In progress...
 ## Assistant Professor
 Dr. Nadejda Drenska ndrenska@lsu.edu
 ## Mathematics Graduate Students:
-Fernando Heidercheidt, Sanjida Nupur, Shalini Shalini
+Fernando Heidercheidt, Sanjida Nupur, Shalini Shalini, Gowri Priya Sunkara
 ## Undergraduate Students:
 ...
 ## AGGRC
